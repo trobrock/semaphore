@@ -1,9 +1,10 @@
 require 'spec_helper'
 
 class CustomStore
-  attr_reader :method_calls
+  attr_reader :method_calls, :name
 
-  def initialize
+  def initialize(name)
+    @name = name
     @method_calls = []
   end
 
@@ -35,8 +36,8 @@ describe Semaphore::Lock do
   end
 
   context 'with a custom store' do
-    let(:store) { CustomStore.new }
-    subject { Semaphore::Lock.new('lock.name', store: store) }
+    subject { Semaphore::Lock.new('lock.name', store: CustomStore) }
+    let(:store) { subject.instance_variable_get(:@backend) }
 
     it 'should use the custom store for locking' do
       subject.lock

@@ -6,7 +6,7 @@ module Semaphore
     def initialize(name, store: nil)
       @name = name
 
-      @backend = store || Stores::MemoryStore.new
+      @backend = (store || Stores::MemoryStore).new(name)
     end
 
     def lock(wait_for: nil)
