@@ -9,8 +9,8 @@ module Semaphore
       @backend = (store || Stores::MemoryStore).new(name)
     end
 
-    def lock(wait_for: nil)
-      poll_for_status(wait_for)
+    def lock(wait_for: nil, before_wait: nil)
+      poll_for_status(wait_for: wait_for, before_wait: before_wait)
     end
 
     def unlock
@@ -19,12 +19,13 @@ module Semaphore
 
     private
 
-    def poll_for_status(wait_for)
+    def poll_for_status(wait_for: nil, before_wait: nil)
       now = Time.now
 
       loop do
         if @backend.locked?
           break unless wait_for && continue_polling?(wait_for, now)
+          before_wait.call if before_wait
           sleep POLLING_INTERVAL
         else
           @backend.lock!

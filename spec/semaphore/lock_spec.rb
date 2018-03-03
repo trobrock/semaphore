@@ -77,5 +77,15 @@ describe Semaphore::Lock do
       end
       expect(Timeout::timeout(5) { subject.lock(wait_for: true) }).to eq(true)
     end
+
+    it 'should call the before_wait block' do
+      counter = 0
+      Thread.new do
+        sleep 2
+        subject.unlock
+      end
+      expect(Timeout::timeout(5) { subject.lock(wait_for: true, before_wait: -> { counter += 1 }) }).to eq(true)
+      expect(counter).to be > 0
+    end
   end
 end
