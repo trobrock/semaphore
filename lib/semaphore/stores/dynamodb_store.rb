@@ -12,17 +12,21 @@ module Semaphore
       end
 
       def locked?
-        !!dynamodb_client.get_item(
-          table_name: TABLE_NAME,
-          key: { :id => @name },
-          consistent_read: true
-        ).item
+        if item && expires_at && Time.now >= expires_at
+          unlock!
+          false
+        else
+          !!item
+        end
       end
 
-      def lock!
+      def lock!(expires_in: nil)
+        data = { id: @name, created: Time.now.to_i }
+        data[:expires_at] = (Time.now + expires_in).to_i if expires_in
+
         dynamodb_client.put_item(
           table_name: TABLE_NAME,
-          item: { :id => @name, :created => Time.now.to_i },
+          item: data,
           condition_expression: 'attribute_not_exists(id)'
         )
         true
@@ -33,12 +37,25 @@ module Semaphore
       def unlock!
         dynamodb_client.delete_item(
           table_name: TABLE_NAME,
-          key: { :id => @name }
+          key: { id: @name }
         )
         true
       end
 
+      def expires_at
+        saved_item = item
+        Time.at(saved_item['expires_at']) if saved_item && saved_item['expires_at']
+      end
+
       private
+
+      def item
+        dynamodb_client.get_item(
+          table_name: TABLE_NAME,
+          key: { :id => @name },
+          consistent_read: true
+        ).item
+      end
 
       def dynamodb_client
         return @dynamodb_client if @dynamodb_client

@@ -14,6 +14,24 @@ describe Semaphore::Stores::DynamodbStore do
     expect(subject.lock!).to eq(true)
   end
 
+  it 'should lock with expiration' do
+    subject.lock!(expires_in: 1)
+    expect(subject.expires_at.to_i).to eq((Time.now + 1).to_i)
+  end
+
+  it 'should unlock and clear the expiration' do
+    subject.lock!(expires_in: 1)
+    subject.unlock!
+    expect(subject.expires_at).to be_nil
+  end
+
+  it 'should clear unlock after expiration' do
+    subject.lock!(expires_in: 1)
+    expect(subject.locked?).to eq(true)
+    sleep 1
+    expect(subject.locked?).to eq(false)
+  end
+
   it 'should unlock' do
     expect(subject.unlock!).to eq(true)
   end

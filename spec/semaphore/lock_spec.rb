@@ -13,7 +13,7 @@ class CustomStore
     false
   end
 
-  def lock!
+  def lock!(expires_in: nil)
     @method_calls << :lock!
     true
   end
@@ -86,6 +86,14 @@ describe Semaphore::Lock do
       end
       expect(Timeout::timeout(5) { subject.lock(wait_for: true, before_wait: -> { counter += 1 }) }).to eq(true)
       expect(counter).to be > 0
+    end
+  end
+
+  context 'with an expiration' do
+    before { subject.lock(expires_in: 2) }
+
+    it 'should timeout an old lock' do
+      expect(Timeout::timeout(3) { subject.lock(wait_for: true) }).to eq(true)
     end
   end
 end
