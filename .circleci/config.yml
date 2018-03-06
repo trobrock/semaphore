@@ -8,6 +8,8 @@ jobs:
     docker:
       # specify the version you desire here
        - image: circleci/ruby:2.5.0
+         environment:
+           AWS_REGION: us-east-1
 
       # Specify service dependencies here if necessary
       # CircleCI maintains a library of pre-built images
