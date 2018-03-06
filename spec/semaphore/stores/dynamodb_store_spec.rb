@@ -16,7 +16,7 @@ describe Semaphore::Stores::DynamodbStore do
 
   it 'should lock with expiration' do
     subject.lock!(expires_in: 1)
-    expect(subject.expires_at.to_i).to eq((Time.now + 1).to_i)
+    expect(subject.expires_at.to_f).to be_within(1.2).of(Time.now.to_f)
   end
 
   it 'should unlock and clear the expiration' do
