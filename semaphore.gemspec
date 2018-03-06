@@ -37,4 +37,5 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "fake_dynamo", "0.2.5"
   spec.add_development_dependency "rspec", ">= 2.0.0"
   spec.add_development_dependency "rspec-mocks"
+  spec.add_development_dependency "rspec_junit_formatter"
 end
