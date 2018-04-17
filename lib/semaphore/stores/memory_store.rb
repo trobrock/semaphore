@@ -1,14 +1,14 @@
 module Semaphore
   module Stores
     class MemoryStore
-      attr_reader :name, :expires_at
+      attr_reader :name
 
       def initialize(name)
         @name = name
       end
 
       def locked?
-        if @locked && @expires_at && Time.now >= @expires_at
+        if expired?
           unlock!
           false
         else
@@ -26,6 +26,10 @@ module Semaphore
         @locked = false
         @expires_at = nil
         true
+      end
+
+      def expired?
+        @locked && @expires_at && Time.now >= @expires_at
       end
     end
   end
