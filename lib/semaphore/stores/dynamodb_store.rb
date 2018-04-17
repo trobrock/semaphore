@@ -12,7 +12,7 @@ module Semaphore
       end
 
       def locked?
-        if item && expires_at && Time.now >= expires_at
+        if expired?
           unlock!
           false
         else
@@ -42,9 +42,11 @@ module Semaphore
         true
       end
 
-      def expires_at
+      def expired?
         saved_item = item
-        Time.at(saved_item['expires_at']) if saved_item && saved_item['expires_at']
+        return false unless saved_item
+        expires_at = Time.at(saved_item['expires_at']) if saved_item['expires_at']
+        expires_at && Time.now >= expires_at
       end
 
       private
